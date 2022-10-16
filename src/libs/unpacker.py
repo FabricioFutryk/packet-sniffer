@@ -11,8 +11,6 @@ class Unpacker():
 
         ttl, protocol, source, target = struct.unpack("! 8x B B 2x 4s 4s", data[:20])
 
-        print(len(data), header_length)
-
         output = {
             "version": version,
             "ttl":  ttl,
