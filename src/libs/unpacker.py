@@ -28,8 +28,26 @@ class Unpacker():
 
     @staticmethod
     def unpack_udp(ipv4_data):
-        pass
+        source_port, destination_port, size = struct.unpack('! H H 2x H', raw_data[:8])
+
+        output = {
+            "source_port": source_port,
+            "destination_port": destination_port,
+            "size":  size,
+            "payload": ipv4_data[8:],
+        }
+
+        return output
 
     @staticmethod
     def unpack_icmp(ipv4_data):
-        pass
+        type, code , checksum = struct.unpack('! B B H', raw_data[:4])
+        
+        output = {
+            "type": type,
+            "code": code,
+            "checksum": checksum,
+            "payload": ipv4_data[4:],
+        }
+
+        return output
