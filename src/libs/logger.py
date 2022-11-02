@@ -1,5 +1,7 @@
-from colorama import Back, Fore
+from colorama import Back, Fore, init
 from libs.utils import Utils
+
+init()
 
 
 class Logger():
@@ -18,8 +20,6 @@ class Logger():
                     self.sP.update(set(range(start, end)))
                 else:
                     self.sP.add(int(arg))
-
-            print(self.sP)
         else:
             self.sP = None
 
@@ -42,7 +42,10 @@ class Logger():
             return False
 
         if ipv4_header["protocol"] in ["TCP", "UDP"]:
-            if packet["sourcePort"] not in self.sP or packet["destinationPort"] not in self.dP:
+            if self.sP is not None and packet["sourcePort"] not in self.sP:
+                print("Not printing")
+                return False
+            if self.sP is not None and packet["destinationPort"] not in self.sP:
                 return False
 
         return True
@@ -55,19 +58,28 @@ class Logger():
         source, target = ipv4_header["source"], ipv4_header["target"]
 
         message = Utils.protocol_to_color(
-            protocol) + "[{}] " + Fore.RESET + "{}: -> {}: TTL: {}"
+            protocol) + "[{}] " + Fore.RESET
 
         if protocol == "TCP":
-            message += "\n"
+            source_port, destination_port = packet["sourcePort"], packet["destinationPort"]
 
-            for flag, state in packet["flags"]:
-                if state:
+            message += "{}:{} -> {}:{} TTL: {}\n\t\t"
+
+            for flag in packet["flags"]:
+                if packet["flags"][flag] != 0:
                     message += Back.GREEN + \
-                        f" {flag.upper()} " + Back.RESET + " "
+                        f" {flag.upper()} " + Back.RESET
                 else:
                     message += Back.RED + \
-                        f" {flag.upper()} " + Back.RESET + " "
-        elif protocol == "ICMP":
-            pass
+                        f" {flag.upper()} " + Back.RESET
 
-        print(message.format(protocol, source, target, ttl))
+            message = message.format(
+                protocol, source, source_port, target, destination_port, ttl) + "\n"
+        elif protocol == "UDP":
+            source_port, destination_port = packet["sourcePort"], packet["destinationPort"]
+
+            message += "{}:{} -> {}:{} TTL: {}\n\t\t"
+            message = message.format(
+                protocol, source, source_port, target, destination_port, ttl) + "\n"
+
+        print(message)
