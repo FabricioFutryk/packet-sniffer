@@ -1,5 +1,15 @@
 from libs.sniffer import PacketSniffer
 import argparse
+import ctypes
+import sys
+
+
+def is_admin():
+    try:
+        return ctypes.windll.shell32.IsUserAnAdmin()
+    except:
+        return False
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -14,5 +24,9 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    sniffer = PacketSniffer(vars(args))
-    sniffer.start_sniffing()
+    if is_admin():
+        sniffer = PacketSniffer(vars(args))
+        sniffer.start_sniffing()
+    else:
+        ctypes.windll.shell32.ShellExecuteW(
+            None, "runas", sys.executable, " ".join(sys.argv), None, 1)
