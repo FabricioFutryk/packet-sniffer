@@ -5,8 +5,8 @@ from libs.utils import Utils
 
 
 class PacketSniffer():
-    def __init__(self, logger_args, host="0.0.0.0"):
-        self.logger = Logger(logger_args)
+    def __init__(self, gui, host="0.0.0.0"):
+        self.logger = Logger(gui)
         self.socket = sk.socket(sk.AF_INET, sk.SOCK_RAW, sk.IPPROTO_IP)
 
         self.socket.bind((host, 0))
