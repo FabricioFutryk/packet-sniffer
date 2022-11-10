@@ -1,12 +1,12 @@
 import socket as sk
 from libs.logger import Logger
 from libs.unpacker import Unpacker
-from libs.utils import Utils
 
 
 class PacketSniffer():
     def __init__(self, gui, host="0.0.0.0"):
-        self.logger = Logger(gui)
+        self.gui = gui
+        self.logger = Logger(self.gui)
         self.socket = sk.socket(sk.AF_INET, sk.SOCK_RAW, sk.IPPROTO_IP)
 
         self.socket.bind((host, 0))
@@ -28,7 +28,19 @@ class PacketSniffer():
 
                 packet = unpacking_func[protocol](payload)
 
+                if not self.gui.statistics.minTTL or ipv4_header["ttl"] < self.gui.statistics.minTTL:
+                    self.gui.statistics.minTTL = ipv4_header["ttl"]
+
+                if not self.gui.statistics.maxTTL or ipv4_header["ttl"] > self.gui.statistics.maxTTL:
+                    self.gui.statistics.maxTTL = ipv4_header["ttl"]
+
+                self.gui.statistics.originsValues.add(
+                    f'{ipv4_header["source"]}:{packet["sourcePort"]}')
+                self.gui.statistics.destinationValues.add(
+                    f'{ipv4_header["target"]}:{packet["destinationPort"]}')
+
                 self.logger.log(ipv4_header, packet)
+                self.gui.statistics.refresh()
 
         except KeyboardInterrupt:
             print("Packet Sniffing Ended!")
