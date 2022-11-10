@@ -1,5 +1,4 @@
 import configparser
-from libs.utils import Utils
 import tkinter as tk
 import os
 import sys
@@ -57,20 +56,24 @@ class Logger():
 
         source_port, destination_port = packet["sourcePort"], packet["destinationPort"]
 
-        self.gui.text.configure(state=tk.NORMAL)
-        self.gui.text.insert(tk.INSERT, f"[{protocol}] ", protocol)
-        self.gui.text.insert(tk.INSERT, "{}:{} -> {}:{} \tTTL: {}\n".format(
+        self.gui.packet_register.text.configure(state=tk.NORMAL)
+        self.gui.packet_register.text.insert(
+            tk.INSERT, f"[{protocol}] ", protocol)
+        self.gui.packet_register.text.insert(tk.INSERT, "{}:{} -> {}:{} \tTTL: {}\n".format(
             source, source_port, target, destination_port, ttl))
 
         if protocol == "TCP":
-            self.gui.text.insert(tk.INSERT, "\t\t")
+            self.gui.packet_register.text.insert(tk.INSERT, "\t\t")
             for flag in packet["flags"]:
                 if packet["flags"][flag] != 0:
-                    self.gui.text.insert(
+                    self.gui.packet_register.text.insert(
                         tk.INSERT, f" {flag.upper()} ", "activeFlag")
                 else:
-                    self.gui.text.insert(
+                    self.gui.packet_register.text.insert(
                         tk.INSERT, f" {flag.upper()} ", "disabledFlag")
-            self.gui.text.insert(tk.INSERT, "\n")
+            self.gui.packet_register.text.insert(tk.INSERT, "\n")
 
-        self.gui.text.configure(state=tk.DISABLED)
+        self.gui.packet_register.text.configure(state=tk.DISABLED)
+
+        if self.gui.packet_register.autoscroll.get():
+            self.gui.packet_register.text.see(tk.END)
