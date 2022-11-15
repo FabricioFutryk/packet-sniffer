@@ -20,7 +20,7 @@ class PacketSniffer():
         }
 
         try:
-            while True:
+            while self.gui.is_open:
                 raw_data, _ = self.socket.recvfrom(65535)
 
                 ipv4_header = Unpacker.unpack_ipv4(raw_data)
@@ -38,6 +38,7 @@ class PacketSniffer():
                     f'{ipv4_header["source"]}:{packet["sourcePort"]}')
                 self.gui.statistics.destinationValues.add(
                     f'{ipv4_header["target"]}:{packet["destinationPort"]}')
+                self.gui.statistics.packet_count += 1
 
                 self.logger.log(ipv4_header, packet)
                 self.gui.statistics.refresh()
